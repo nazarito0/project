@@ -4,8 +4,8 @@ metadata:
   name: argocd-ingress
   namespace: argocd
   annotations:
-    nginx.ingress.kubernetes.io/ssl-passthrough: "true" # Важливо для HTTPS nginx не розшифровує одразу відає argocd
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS" # на бекенд йде зашифрований трафік
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
 spec:
   ingressClassName: nginx
   rules:

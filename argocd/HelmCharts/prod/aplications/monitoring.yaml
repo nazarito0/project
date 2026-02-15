@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name     : vm # назва має бути коротка бо є ліміти не більше 63
+  name     : vm
   namespace: argocd
   finalizers:
   - resources-finalizer.argocd.argoproj.io
@@ -20,4 +20,4 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - ServerSideApply=true  #вирішує Too long: may not be more than 262144 bytes щоб пролізли великі config мапи
+      - ServerSideApply=true  #вирішує Too long: may not be more than 262144 bytes щоб пропустило великі config мапи

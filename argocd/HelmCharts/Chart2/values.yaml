@@ -1,22 +1,20 @@
 victoria-metrics-k8s-stack:
-  # Налаштування бази даних
   vmsingle:
     spec:
-      retentionPeriod: "1d" # Зберігаємо метрики 1 день для економії місця
-      storage: # В операторі VM правильне поле для диску - 'storage'
+      retentionPeriod: "1d"
+      storage:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
             storage: "1Gi"
       extraArgs:
-        storage.minFreeDiskSpaceBytes: "100MB" # Залишати 100МБ вільними щоб база не "впала" в критичну помилку
+        storage.minFreeDiskSpaceBytes: "100MB"
       resources:
         limits:
           memory: "800Mi"
         requests:
           memory: "400Mi"
 
-  # Агент який збирає метрики
   vmagent:
     spec:
       resources:
@@ -27,9 +25,9 @@ victoria-metrics-k8s-stack:
 
   grafana:
     enabled: true
-    adminPassword: "admin" # Встановити свій пароль
+    adminPassword: "admin"
     persistence:
-      enabled: true #false # Вимикаємо диски щоб не було CrashLoop через права
+      enabled: true
       size: "1Gi"
     resources:
       limits:
@@ -58,7 +56,6 @@ victoria-logs-single:
     extraArgs:
       storage.minFreeDiskSpaceBytes: "100MB"
 
-# Агент який збирає логи для single
 fluent-bit:
   config:
     outputs: |
@@ -70,7 +67,6 @@ fluent-bit:
           URI   /insert/jsonline?_stream_fields=pod_name,container_name,namespace_name
           Format json_lines
           json_date_format iso8601
-  # У чарті Fluent Bit ресурси пишуться безпосередньо в секції resources без spec
   resources:
     limits:
       memory: "300Mi"

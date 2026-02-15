@@ -1,5 +1,7 @@
 #!/bin/bash
 
+sudo minikube start
+
 IP=$(minikube ip)
 
 if [ -z "$IP" ]; then
