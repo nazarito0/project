@@ -1,0 +1,78 @@
+victoria-metrics-k8s-stack:
+  # Налаштування бази даних
+  vmsingle:
+    spec:
+      retentionPeriod: "1d" # Зберігаємо метрики 1 день для економії місця
+      storage: # В операторі VM правильне поле для диску - 'storage'
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: "1Gi"
+      extraArgs:
+        storage.minFreeDiskSpaceBytes: "100MB" # Залишати 100МБ вільними щоб база не "впала" в критичну помилку
+      resources:
+        limits:
+          memory: "800Mi"
+        requests:
+          memory: "400Mi"
+
+  # Агент який збирає метрики
+  vmagent:
+    spec:
+      resources:
+        limits:
+          memory: "300Mi"
+        requests:
+          memory: "150Mi"
+
+  grafana:
+    enabled: true
+    adminPassword: "admin" # Встановити свій пароль
+    persistence:
+      enabled: true #false # Вимикаємо диски щоб не було CrashLoop через права
+      size: "1Gi"
+    resources:
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+
+  victoria-metrics-operator:
+    admissionWebhooks:
+      enabled: false
+
+victoria-logs-single:
+  server:
+    retentionPeriod: "1d"
+    persistentVolume:
+      enabled: true
+      size: "1Gi"
+      accessModes: ["ReadWriteOnce"]
+    resources:
+      limits:
+        memory: "512Mi"
+      requests:
+        memory: "256Mi"
+    extraArgs:
+      storage.minFreeDiskSpaceBytes: "100MB"
+
+# Агент який збирає логи для single
+fluent-bit:
+  config:
+    outputs: |
+      [OUTPUT]
+          Name  http
+          Match *
+          Host  vm-victoria-logs-single-server
+          Port  9428
+          URI   /insert/jsonline?_stream_fields=pod_name,container_name,namespace_name
+          Format json_lines
+          json_date_format iso8601
+  # У чарті Fluent Bit ресурси пишуться безпосередньо в секції resources без spec
+  resources:
+    limits:
+      memory: "300Mi"
+    requests:
+      memory: "150Mi"

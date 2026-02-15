@@ -1,0 +1,28 @@
+---
+- name: Install node and java in slave
+  hosts: slave
+  become: true
+
+  tasks:
+    - name: Update apt
+      apt:
+        update_cache: true
+
+    - name: install java
+      apt:
+        name: openjdk-21-jdk
+        state: present
+
+    - name: install curl
+      apt:
+        name: curl
+        state: present
+
+    - name: Add NodeSource repository for Node.js 24.x
+      shell: curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
+
+    - name: install node-js
+      apt:
+        name: nodejs
+        state: present
+        update_cache: true

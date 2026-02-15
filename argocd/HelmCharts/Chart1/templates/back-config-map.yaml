@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: back-config
+data:
+  APP_MODE: "back"
+  API_URL: "http://backend-service:5000"
+  #API_URL: "http://myapp.local/api" # можна юез /api

@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name     : vm # назва має бути коротка бо є ліміти не більше 63
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    name     : in-cluster
+    namespace: monitoring
+  source:
+    path   : "HelmCharts/Chart2"
+    repoURL: "git@github.com:nazarito0/ArgoCD.git"
+    targetRevision: HEAD
+  project: default
+  syncPolicy:
+    automated:
+      prune   : true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true  #вирішує Too long: may not be more than 262144 bytes щоб пролізли великі config мапи

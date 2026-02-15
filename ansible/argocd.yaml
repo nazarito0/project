@@ -1,0 +1,26 @@
+---
+- name: Install Argo CD на Minikube
+  hosts: slave
+  become: true
+  tasks:
+    - name: Створюємо namespace argocd
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: argocd
+
+    - name: Завантажуємо офіційний маніфест Argo CD з інтернету
+      ansible.builtin.get_url:
+        url: https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+        dest: /tmp/argocd-install.yaml
+        mode: '0644'
+
+    - name: Встановлюємо Argo CD
+      kubernetes.core.k8s:
+        state: present
+        src: /tmp/argocd-install.yaml
+        wait: true
+        wait_timeout: 300

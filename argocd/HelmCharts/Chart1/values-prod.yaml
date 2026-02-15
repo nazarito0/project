@@ -1,0 +1,45 @@
+frontend:
+  replicaCount: 1
+  image: "nazarito0/fullstack-frontend:24"
+  resources:
+    limits:
+      cpu: 200m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  ports:
+    containerPort: 80
+  service:
+    ports:
+        protocol: TCP
+        port: 80
+        targetPort: 80
+
+backend:
+  replicaCount: 1
+  image: "nazarito0/fullstack-backend:24"
+  resources:
+    limits:
+      cpu: 200m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+
+db:
+  replicaCount: 1
+  image: "postgres:16-alpine"
+  resources:
+    limits:
+      cpu: 200m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+imagePullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP

@@ -1,0 +1,14 @@
+---
+- name: Install haproxy
+  hosts: slave
+  become: true
+
+  tasks:
+    - name: Update apt
+      apt:
+        update_cache: true
+
+    - name: Install haproxy
+      apt:
+        name: haproxy
+        state: present

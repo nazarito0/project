@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mychart.fullname" . }}-frontend-deployment
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "mychart.fullname" . }}-frontend
+  template:
+    metadata:
+      labels:
+        app: {{ include "mychart.fullname" . }}-frontend
+    spec:
+      containers:
+        - name: {{ include "mychart.fullname" . }}-frontend
+          image: {{ .Values.frontend.image }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }} # пробіли з лівого краю це число 12
+          ports:
+            - containerPort: {{ .Values.frontend.ports.containerPort }}
+          envFrom:
+            - configMapRef:
+                name: back-config
