@@ -124,6 +124,7 @@ Monitoring & Efficiency (VictoriaMetrics)
  On the slave node:
 
  `minikube start --nodes 3 -p prod`
+ 
  `minikube addons enable ingress`
 
  **Deploy GitOps stack**
