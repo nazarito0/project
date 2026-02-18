@@ -53,7 +53,7 @@ Monitoring & Efficiency (VictoriaMetrics)
 
  - Замість класичного Prometheus-стека обрано VictoriaMetrics, що є критично важливим для локального середовища з обмеженими ресурсами.
 
- - vmagent збирає метрики з Kubernetes та віртуальних машин.
+ - vmagent збирає метрики з Kubernetes та віртуальної машини.
 
  - VictoriaLogs інтегровано для централізованого збору логів.
 
