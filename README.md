@@ -1,14 +1,14 @@
 # End-to-End DevOps Project: Self-Hosted GitOps Infrastructure
 
-**1. Резюме проєкту**
+**1. Project summary**
 
-**One-liner:** Комплексна GitOps-платформа на базі **ArgoCD** у кластері **Kubernetes**, побудована з використанням **Ansible**, автоматизованого СІ-пайплайну **Jenkins** та моніторингу через **VictoriaMetrics**.
+**One-liner:** A comprehensive GitOps platform based on **ArgoCD** in a **Kubernetes** cluster, built using **Ansible**, an automated CI pipeline **Jenkins**, and monitoring via **VictoriaMetrics**.
 
-**Мета:** Реалізувати повний життєвий цикл доставки ПЗ у локальному середовищі, використовуючи **Ansible** для підготовки інфраструктури, **Jenkins** для збірки та перевірки коду, **Kubernetes** для запуску сервісів, **ArgoCD** для автоматизації деплою та **VictoriaMetrics** для глибокої видимості стану системи.
+**Мета:** Implement the full software delivery lifecycle in an on-premises environment using **Ansible** for infrastructure preparation, **Jenkins** for code build and verification, **Kubernetes** for service launch, **ArgoCD** for deployment automation, and **VictoriaMetrics** for deep visibility into system health.
 
-**2. Технологічний стек**
+**2. Technological stack**
 
-| Сфера | Інструменти |
+| Sphere | Tools |
 | --- | --- |
 | Infrastructure (IaC) | Vagrant, Ansible |
 | Orchestration | Kubernetes (Minikube) |
@@ -29,45 +29,45 @@ The platform consists of five logical layers:
 - Runtime Layer (Kubernetes + PostgreSQL)
 - Observability Layer (VictoriaMetrics + Grafana)
 
-**3. Опис реалізації**
+**3. Implementation description**
 
-Інфраструктура розгортається у VirtualBox.
+The infrastructure is deployed in VirtualBox.
 
 Infrastructure & Networking
 
- - Vagrant cтворює три віртуальні машини у приватній мережі і надає їм IP адреси (Jenkins, Ansible, Slave).
+ - Vagrant creates three virtual machines in a private network and assigns them IP addresses (Jenkins, Ansible, Slave).
 
- - Ansible автоматизує конфігурацію: встановлення Docker, Minikube тощо.
+ - Ansible automates configuration: installing Docker, Minikube, etc.
 
- - Налаштовано дворівневу схему балансування. Зовнішній трафік приймається HAProxy на рівні віртуальних машин і перенаправляється на Ingress Controller всередині Kubernetes кластера. Це дозволяє гнучко керувати маршрутизацією та забезпечувати доступ до сервісів за доменними іменами (argocd.local, grafana.local, тощо).
+ - A two-tier load balancing scheme is configured. External traffic is accepted by HAProxy at the virtual machine level and redirected to the Ingress Controller inside the Kubernetes cluster. This allows for flexible routing management and access to services by domain names (argocd.local, grafana.local, etc.).
 
 CI Pipeline (Jenkins & SonarQube)
 
- - Пайплайн реалізований через Jenkins із використанням SCM Polling для реагування на зміни в коді, без ручного втручання.
+ - The pipeline is implemented through Jenkins using SCM Polling to respond to code changes, without manual intervention.
 
- - Кожен білд проходить аналіз у SonarQube.
+ - Each build is analyzed in SonarQube.
 
- - Налаштовано Quality Gates: якщо код не відповідає стандартам безпеки або якості, пайплайн зупиняється, блокуючи пуш Docker-образу. Це гарантує стабільність релізів.
+ - Quality Gates are configured: if the code does not meet security or quality standards, the pipeline stops, blocking the Docker image push. This ensures stable releases.
 
 Delivery & GitOps (ArgoCD & Helm)
 
- - Деплой реалізовано за концепцією GitOps.
+ - The deployment is implemented using the GitOps concept.
 
- - ArgoCD відстежує стан Helm-чартів у Git-репозиторії.
+ - ArgoCD tracks the status of Helm charts in a Git repository.
 
- - У разі відхилення конфігурації в кластері від описаної в Git, ArgoCD автоматично виконує Self-healing.
+ - If the configuration in the cluster deviates from that described in Git, ArgoCD automatically performs Self-healing.
 
- - Використання Helm дозволяє параметризувати деплой та легко керувати версіями застосунку.
+ - Using Helm allows you to parameterize deployment and easily manage application versions.
 
 Monitoring & Efficiency (VictoriaMetrics)
 
- - Замість класичного Prometheus-стека обрано VictoriaMetrics, що є критично важливим для локального середовища з обмеженими ресурсами.
+ - Instead of the classic Prometheus stack, VictoriaMetrics was chosen, which is critically important for a local environment with limited resources.
 
- - vmagent збирає метрики з Kubernetes та віртуальної машини.
+ - vmagent collects metrics from Kubernetes and the virtual machine.
 
- - VictoriaLogs інтегровано для централізованого збору логів.
+ - VictoriaLogs is integrated for centralized log collection.
 
- - Дані візуалізуються у Grafana. Такий вибір дозволив знизити споживання RAM в порівнянні зі стандартними рішеннями.
+ - Data is visualized in Grafana. This choice allowed us to reduce RAM consumption compared to standard solutions.
 
 **4. Screenshots**
 
@@ -180,6 +180,6 @@ Monitoring & Efficiency (VictoriaMetrics)
 
 **7. Future improvements**
 
- - Cloud Migration: Перенесення проєкту на AWS за допомогою Terraform.
+ - Cloud Migration: Migrating the project to AWS using Terraform.
 
- - Secret Management: Впровадження HashiCorp Vault (замість базових K8s Secrets) для динамічного керування паролями.
+ - Secret Management: Implementing HashiCorp Vault (instead of the basic K8s Secrets) for dynamic password management.
