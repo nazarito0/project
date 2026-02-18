@@ -19,6 +19,16 @@
 | Networking | HAProxy, Ingress Controller |
 | Database | PostgreSQL (with PVC) |
 
+**Architecture Overview**
+
+The platform consists of five logical layers:
+
+- Infrastructure Layer (Vagrant + Ansible)
+- CI Layer (Jenkins + SonarQube)
+- GitOps Layer (ArgoCD + Helm)
+- Runtime Layer (Kubernetes + PostgreSQL)
+- Observability Layer (VictoriaMetrics + Grafana)
+
 **3. Опис реалізації**
 
 Інфраструктура розгортається у VirtualBox.
@@ -59,162 +69,116 @@ Monitoring & Efficiency (VictoriaMetrics)
 
  - Дані візуалізуються у Grafana. Такий вибір дозволив знизити споживання RAM в порівнянні зі стандартними рішеннями.
 
-**4. Скріншоти**
+**4. Screenshots**
 
- - ArgoCD: Стан застосунків у кластері
-
- ![alt text](foto/argoimage.png)
+ - ArgoCD: Dashboard showing application health
 
  ![alt text](foto/aimage.png)
 
- - Grafana: Моніторинг ресурсів та метрик
+ - Grafana: Cluster metrics visualization
 
  ![alt text](foto/gimage.png)
 
  ![alt text](foto/g1image-1.png)
 
- - SonarQube: Звіт про якість коду
+ - SonarQube: Code quality report
 
  ![alt text](foto/simage.png)
 
-**5. Як запустити**
- - Встановіть VirtualBox:
+**5. Getting started**
 
- `https://www.virtualbox.org/wiki/Downloads`
+ Prerequisites
 
- - Клонуйте репозиторій.
+ - VirtualBox
+ - Vagrant
+ - Git
 
- `git clone (repo url)`
+ **Provision infrastructure**
 
- - Підніміть віртуальні машини, запустивши Vagrantfile у папці vagrantfile:
+ `git clone <repo-url>`
+
+ `cd vagrant`
 
  `vagrant up`
 
- - Запустіть скрипт на ansible ноді:
+ This will:
 
- `script.sh`
+ - Create 3 VMs (Jenkins, Ansible, Slave)
 
- - Запустіть скрипт на jenkins, slave нодах:
+ - Configure private networking
 
- `script2.sh`
+ - Prepare base OS environment
 
- - Запустіть усі конфігураційні файли з розширенням .yaml в папці (ansible) через Ansible (з ноди ansible):
+ **Configure infrastructure via ansible**
+
+ From the Ansible node:
 
  `ansible-playbook -i hosts docker.yaml`
 
- - Додайте мапінг IP-адрес у файл hosts вашої Windows-системи для доступу до сервісів (jenkins.local, grafana.local, тощо).
+ This playbook:
 
- `C:\Windows\System32\drivers\etc\hosts`
+ - Installs Docker
 
- ![alt text](foto/image.png)
+ Run the remaining playbooks in this directory to fully provision the environment.
 
- ---
+ **Start kubernetes cluster**
 
- - **Налаштування jenkins vm**
-
- - Витягніть пароль для jenkins:
-
- ![alt text](foto/image-1.png)
-
- - Встановіть плагіни:
-
- ![alt text](foto/image7.png)
-
- - Добавте у Jenkins credential щоб підключитися до slave, через SSH, приватнй ключ розташований у папці де Vagrantfile:
-
- `D:\...\.vagrant\machines\slave\virtualbox`
-
- ![alt text](foto/image5.png)
-
- ![alt text](foto/image6.png)
-
- - Виконайте наступні дії щоб налаштувати усе необхідне для коректної роботи Jenkins:
-
- ![alt text](foto/image0.png)
-
- ![alt text](foto/image-10.png)
-
- ![alt text](foto/image-20.png)
-
- ![alt text](foto/image-30.png)
-
- ![alt text](foto/image-40.png)
-
- ![alt text](foto/image-50.png)
-
- ![alt text](foto/image-60.png)
-
- ![alt text](foto/image-70.png)
-
- ![alt text](foto/image-80.png)
-
- - Створіть пайплайн:
-
- ![alt text](foto/image-90.png)
-
- ![alt text](foto/image-100.png)
-
- ![alt text](foto/image-110.png)
-
- ![alt text](foto/image-120.png)
-
- ![alt text](foto/image-130.png)
-
- - Чотири креденціала має бути додано.
-
- ![alt text](foto/image-140.png)
-
- ---
-
- - **Налаштування slave vm**
-
- - Налаштуйте haproxy.cfg:
-
- `cd /etc/haproxy/haproxy.cfg`
-
- ![alt text](foto/image1.png)
-
- - Запустіть minikube:
+ On the slave node:
 
  `minikube start --nodes 3 -p prod`
-
- - Підключіть через addon IngressControler:
-
  `minikube addons enable ingress`
 
- - Встановіть ArgoCD у кластер:
+ **Deploy GitOps stack**
+
+ Install Argo CD:
 
  `kubectl create namespace argocd`
 
  `kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml`
 
-  - Запустіть файл ingress.yaml який у папці argocd на slave щоб перенаправити ArgoCD через IngressControler.
+ Apply ingress configuration:
 
  `kubectl apply -f ingress.yaml`
 
- - Витягніть пароль до ArgoCD
+ **Access services**
 
- `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d; echo`
+ Add VM IP mappings to:
 
- - Створіть репозиторій на GitHub для ArgoCD і закиньте тупи папку HelmCharts і підключіть по SSH. Згенеруйте ключі командою:
+ `C:\Windows\System32\drivers\etc\hosts`
 
- `ssh-keygen`
+ Example:
 
- ![alt text](foto/image2.png)
+ `192.168.50.34 frontend.com`
 
- - Добавити у репозиторій deploy key, public:
+ `192.168.50.34 backend.com`
 
- ![alt text](foto/image3.png)
+ `192.168.50.34 argocd.local`
 
- - Добавити у ArgoCD репозиторій GitHub, і SSH private key:
+ `192.168.50.34 grafana.local`
 
- ![alt text](foto/image4.png)
+ **Jenkins pipeline**
 
- - Також силка на GitHub репозиторій додатка:
+ - Multistage pipeline defined as code (Jenkinsfile)
 
- `https://github.com/nazarito0/fullstack`
+ - SCM polling enabled
 
-**6. Майбутні покращення**
+ - Quality Gates enforced via SonarQube
+
+ - Docker images pushed to registry
+
+ - GitOps repository updated automatically
+
+**6. Key engineering decisions**
+
+ - GitOps approach ensures declarative deployments and automatic drift correction.
+
+ - VictoriaMetrics instead of Prometheus was chosen due to lower RAM consumption in a resource-constrained local environment.
+
+ - Two-layer traffic routing (HAProxy + Ingress) separates VM-level networking from cluster-level service routing.
+
+ - Quality Gates in Jenkins prevent deployment of low-quality or insecure code.
+
+**7. Future improvements**
 
  - Cloud Migration: Перенесення проєкту на AWS за допомогою Terraform.
 
