@@ -77,8 +77,6 @@ Monitoring & Efficiency (VictoriaMetrics)
 
  - Grafana: Cluster metrics visualization
 
- ![alt text](foto/gimage.png)
-
  ![alt text](foto/g1image-1.png)
 
  - SonarQube: Code quality report
